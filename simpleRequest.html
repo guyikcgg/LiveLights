@@ -1,0 +1,53 @@
+<html>
+<body>
+    <script type="text/javascript">
+    var WICED_URL = "http://192.168.0.119/"
+
+    function get(url, callbackFunction) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                callbackFunction(xhr.responseText);
+            }
+        };
+        xhr.send();
+    }
+
+    function nDigits(value, n) {
+        var strValue = value.toString();
+
+        while(strValue.length < n) {
+            strValue = '0' + strValue;
+        }
+        return strValue;
+    }
+
+    function setColor(red, green, blue) {
+        get(WICED_URL + "c?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3));
+    }
+
+    function setTransition(red, green, blue, time) {
+        get(WICED_URL + "t?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3), nDigits(time,5));
+    }
+
+
+    </script>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js">
+    </script>
+
+    <form>
+        <label for="red">Red:</label>
+        <input type="range" name="red" id="red" value="50" min="0" max="50">
+        <br>
+        <label for="green">Green:</label>
+        <input type="range" name="green" id="green" value="50" min="0" max="50">
+        <br>
+        <label for="blue">Blue:</label>
+        <input type="range" name="blue" id="blue" value="50" min="0" max="50">
+        <br>
+        <button type="button" name="button" onclick="setColor(0,0,0);">SEND</button>
+    </form>
+</body>
+</html>
