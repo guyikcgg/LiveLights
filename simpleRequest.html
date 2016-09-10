@@ -41,12 +41,22 @@
         var i = 0;
 
         setInterval(function() {
-            if (i==0) {
-                i = 1;
-                setSmooth(50,0,0,1000);
-            } else {
-                i = 0;
-                setSmooth(0,0,50,1000);
+            switch (i) {
+                case 0:
+                    setSmooth(20,0,0,1000);
+                    i++;
+                    break;
+                case 1:
+                    setSmooth(0,20,0,1000);
+                    i++;
+                    break;
+                case 2:
+                    setSmooth(0,0,20,1000);
+                    i = 0;
+                    break;
+                default:
+                    i = 0;
+                    break;
             }
         }, 1000);
     </script>
