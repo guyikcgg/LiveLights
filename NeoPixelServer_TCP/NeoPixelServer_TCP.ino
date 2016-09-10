@@ -36,7 +36,7 @@ DEFINES
 #define WLAN_PASS            "raoqqsnm76633599O"
 #define PORT                 80                     // The TCP port to use
 #define PIN                  PC7  // 4*8 Neopixel Wing uses PC7 by default
-#define NUMPIXELS            20   // 32 pixels on https://www.adafruit.com/product/2945
+#define NUMPIXELS            44   // 32 pixels on https://www.adafruit.com/product/2945
 #define TIME_COUNTER millis()
 
 /*
@@ -44,7 +44,8 @@ ENUMS
  */
 typedef enum {
     NONE,
-    CHANGE_COLOR
+    CHANGE_COLOR,
+    SMOOTH_CHANGE
 } command_t;
 
 /*
@@ -53,6 +54,7 @@ FUNCTION PROTOTYPES
 int taskTCPServer();
 int taskNeoPixels();
 void disconnect_callback(void);
+bool connectAP(void);
 
 /*
 GLOBAL VARIABLES
@@ -66,7 +68,7 @@ uint8_t r, g, b;
 uint16_t t;
 
 // NeoPixels
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGBW + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 
 
 /*
@@ -111,22 +113,55 @@ Update the values of the LEDs
 int taskNeoPixels() {
     uint16_t i = 0;
     static command_t currentCommand = NONE;
+    static float rc, gc, bc; // current colors
+    static float dr, dg, db; // differential color
 
     TASK_BEGIN;
     STATE_0:
 
-    if (theCommand == CHANGE_COLOR) {
-        theCommand == NONE;
+    switch (theCommand) {
+      case CHANGE_COLOR:
+        currentCommand = theCommand;
+        theCommand = NONE;
+        rc = (float) r;
+        gc = (float) g;
+        bc = (float) b;
         for (i = 0; i < NUMPIXELS; i++)
         {
             pixels.setPixelColor(i, pixels.Color(g, r, b, 0));
         }
 
         pixels.show();
+        break;
+      case SMOOTH_CHANGE:
+        currentCommand = theCommand;
+        theCommand = NONE;
+        dr = (float) (r - rc) / (float) t;
+        dg = (float) (g - gc) / (float) t;
+        db = (float) (b - bc) / (float) t;
+        break;
     }
 
-    TASK_YIELD_MINVT(20);
+    TASK_YIELD_MINVT(10);
     STATE_1:
+
+    switch (currentCommand) {
+      case SMOOTH_CHANGE:
+        if (t>0) {
+          --t;
+          rc += dr;
+          gc += dg;
+          bc += db;
+  
+          for (i = 0; i < NUMPIXELS; i++) {
+              pixels.setPixelColor(i, pixels.Color((uint8_t)gc, (uint8_t)rc, (uint8_t)bc, 0));
+          }
+          pixels.show();
+        } else {
+          currentCommand = NONE;
+        }
+        break;
+    }
 
     TASK_END;
 }
@@ -164,16 +199,23 @@ int taskTCPServer() {
         if (!memcmp(buffer, "GET /", 5)) {
             // change color
             if (buffer[5] == 'c') {
-                theCommand = CHANGE_COLOR;
-                r = atoi((char*) &buffer[7]);
-                g = atoi((char*) &buffer[11]);
-                b = atoi((char*) &buffer[15]);
-
-                client.write(httpOK, strlen(httpOK));
+              theCommand = CHANGE_COLOR;
+              r = atoi((char*) &buffer[7]);
+              g = atoi((char*) &buffer[11]);
+              b = atoi((char*) &buffer[15]);
+              client.write(httpOK, strlen(httpOK));    
+              
+            } else if (buffer[5] == 's') {
+              theCommand = SMOOTH_CHANGE;
+              r = atoi((char*) &buffer[7]);
+              g = atoi((char*) &buffer[11]);
+              b = atoi((char*) &buffer[15]);
+              t = atoi((char*) &buffer[19]);
+              client.write(httpOK, strlen(httpOK));
+              
             } else {
               client.write(httpNOT_FOUND, strlen(httpNOT_FOUND));
             }
-
         } else {
           client.write(httpNOT_IMPLEMENTED, strlen(httpNOT_IMPLEMENTED));
         }
