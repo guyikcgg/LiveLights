@@ -1,0 +1,4 @@
+S/N: 		OSR017AD73D-C7
+WiFi-MAC: 	84:18:26:7A:D7:3D
+SSID: 		Lightify-7AD73D
+PW: 		auDlgfdcaC
