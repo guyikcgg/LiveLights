@@ -27,6 +27,8 @@
 
 #include <adafruit_feather.h>
 #include <Adafruit_NeoPixel.h>
+#include "mmtask.h"
+
 
 #define WLAN_SSID            "KDG-CF064"
 #define WLAN_PASS            "raoqqsnm76633599O"
@@ -37,6 +39,9 @@ AdafruitTCPServer tcpserver(PORT);
 
 #define PIN                  PC7  // 4*8 Neopixel Wing uses PC7 by default
 #define NUMPIXELS            20   // 32 pixels on https://www.adafruit.com/product/2945
+
+#define TIME_COUNTER millis()
+
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGBW + NEO_KHZ800);
 
@@ -102,9 +107,16 @@ void setup()
 
 
 typedef enum {
-  COLOR
+  NONE,
+  CHANGE_COLOR
 } command_t;
 
+int taskTCPServer();
+int taskNeoPixels();
+
+command_t theCommand;
+uint8_t r, g, b;
+uint16_t t;
 
 /**************************************************************************/
 /*!
@@ -113,13 +125,66 @@ typedef enum {
 /**************************************************************************/
 void loop()
 {
+  taskTCPServer();
+  taskNeoPixels();
+}
+
+
+int taskNeoPixels() {  
+  uint16_t i = 0;
+  static command_t currentCommand = NONE;
+
+  TASK_BEGIN;
+  STATE_0:
+  
+  if (theCommand == CHANGE_COLOR) {
+    theCommand == NONE;
+    for (i = 0; i < NUMPIXELS; i++)
+    {
+      pixels.setPixelColor(i, pixels.Color(g, r, b, 0));
+    }
+
+    pixels.show();
+  }
+  
+  TASK_YIELD_MINVT(20);
+  STATE_1:
+
+  TASK_END;
+
+  //    // Set the NeoPixel
+//    uint16_t pixel_num = 0;
+//    memcpy(&pixel_num, &buffer[0], 2);
+//    if (pixel_num == 0xFFFF)
+//    {
+//      //Serial.print("Setting all pixels");
+//      uint16_t i = 0;
+//      for (i = 0; i < NUMPIXELS; i++)
+//      {
+//        pixels.setPixelColor(i, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
+//      }
+//    }
+//    else if (pixel_num == 0xFFFE)
+//    {
+//      rainbowCycle(20);
+//    }
+//    else
+//    {
+//      //Serial.print("Setting pixel "); Serial.println(pixel_num);
+//      pixels.setPixelColor(pixel_num, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
+//    }
+//    pixels.show();
+}
+
+
+const char html_response[] = "<html><body><h1>OK</h1></body></html>";
+
+int taskTCPServer() {
   uint8_t buffer[256];
   uint16_t len;
-  
-  command_t theCommand;
-  uint8_t r, g, b;
-  uint16_t t;
 
+  TASK_BEGIN;
+  STATE_0:
   
 
   AdafruitTCP client = tcpserver.available();
@@ -141,77 +206,22 @@ void loop()
     if (!memcmp(buffer, "GET /", 5)) {
       // change color
       if (buffer[5] == 'c') {
+        theCommand = CHANGE_COLOR;
         r = atoi((char*) &buffer[7]);
         g = atoi((char*) &buffer[11]);
         b = atoi((char*) &buffer[15]);
-  
-        uint16_t i = 0;
-        for (i = 0; i < NUMPIXELS; i++)
-        {
-          pixels.setPixelColor(i, pixels.Color(g, r, b, 0));
-        }
       }
 
     }
 
-
-
-
-
-
-
-
-
-
-
-    client.write(buffer, len);
+    client.write(html_response, sizeof(html_response));
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-//    // Set the NeoPixel
-//    uint16_t pixel_num = 0;
-//    memcpy(&pixel_num, &buffer[0], 2);
-//    if (pixel_num == 0xFFFF)
-//    {
-//      //Serial.print("Setting all pixels");
-//      uint16_t i = 0;
-//      for (i = 0; i < NUMPIXELS; i++)
-//      {
-//        pixels.setPixelColor(i, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
-//      }
-//    }
-//    else if (pixel_num == 0xFFFE)
-//    {
-//      rainbowCycle(20);
-//    }
-//    else
-//    {
-//      //Serial.print("Setting pixel "); Serial.println(pixel_num);
-//      pixels.setPixelColor(pixel_num, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
-//    }
-    pixels.show();
 
     // call stop() to free memory by Client
     client.stop();
   }
+
+  TASK_END;
 }
 
 /**************************************************************************/
