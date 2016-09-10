@@ -31,7 +31,7 @@
 #define WLAN_SSID            "KDG-CF064"
 #define WLAN_PASS            "raoqqsnm76633599O"
 
-#define PORT                 8888                     // The TCP port to use
+#define PORT                 80                     // The TCP port to use
 
 AdafruitTCPServer tcpserver(PORT);
 
@@ -82,11 +82,6 @@ void setup()
   // Wait for the serial port to connect. Needed for native USB port only.
   while (!Serial) delay(1);
 
-  Serial.println("Neopixel TCP Server Example\r\n");
-
-  // Print all software versions
-  Feather.printVersions();
-
   // Set disconnection callback
   Feather.setDisconnectCallback(disconnect_callback);
 
@@ -95,44 +90,21 @@ void setup()
     delay(500); // delay between each attempt
   }
 
-  // Connected: Print network info
-  Feather.printNetwork();
-
-  // Tell the TCP Server to auto print error codes and halt on errors
-  tcpserver.err_actions(true, true);
-
   // Starting server at defined port
   tcpserver.begin();
 
   // Initialize the NeoPixel library
   pixels.begin();
-
-  Serial.print("Listening on port "); Serial.println(PORT);
-
-  // Display a simple help message
-  Serial.println("");
-  Serial.println("*********************************************************************");
-  Serial.println("");
-  Serial.println("To update a neopixel send the following payload over TCP:");
-  Serial.println("");
-  Serial.println("  [U16:Pixel Number] [U8:Red] [U8:Green] [U8:Blue]");
-  Serial.println("");
-  Serial.println("To update pixel 8 to 100% green, for example, you would send:");
-  Serial.println("");
-  Serial.println("  08 00 00 FF 00");
-  Serial.println("");
-  Serial.println("Where:");
-  Serial.println("");
-  Serial.println("  0x0008 = Pixel number 8 (in little-endian notation 0x0008 = 08 + 00)");
-  Serial.println("    0x00 = Red (0)");
-  Serial.println("    0xFF = Green (255)");
-  Serial.println("    0x00 = Blue (0)");
-  Serial.println("");
-  Serial.println("To update all pixels at once, send 0xFFFF (65535) as the pixel number");
-  Serial.println("");
-  Serial.println("*********************************************************************");
-  Serial.println("");
+  
 }
+
+
+
+
+typedef enum {
+  COLOR
+} command_t;
+
 
 /**************************************************************************/
 /*!
@@ -143,6 +115,12 @@ void loop()
 {
   uint8_t buffer[256];
   uint16_t len;
+  
+  command_t theCommand;
+  uint8_t r, g, b;
+  uint16_t t;
+
+  
 
   AdafruitTCP client = tcpserver.available();
 
@@ -157,27 +135,78 @@ void loop()
     Serial.printf(" port %d : ", client.remotePort());
     PrintHex(buffer, len);
 
-    // Set the NeoPixel
-    uint16_t pixel_num = 0;
-    memcpy(&pixel_num, &buffer[0], 2);
-    if (pixel_num == 0xFFFF)
-    {
-      //Serial.print("Setting all pixels");
-      uint16_t i = 0;
-      for (i = 0; i < NUMPIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
+
+    /*** ANALYZE BUFFER ***/
+
+    if (!memcmp(buffer, "GET /", 5)) {
+      // change color
+      if (buffer[5] == 'c') {
+        r = atoi((char*) &buffer[7]);
+        g = atoi((char*) &buffer[11]);
+        b = atoi((char*) &buffer[15]);
+  
+        uint16_t i = 0;
+        for (i = 0; i < NUMPIXELS; i++)
+        {
+          pixels.setPixelColor(i, pixels.Color(g, r, b, 0));
+        }
       }
+
     }
-    else if (pixel_num == 0xFFFE)
-    {
-      rainbowCycle(20);
-    }
-    else
-    {
-      //Serial.print("Setting pixel "); Serial.println(pixel_num);
-      pixels.setPixelColor(pixel_num, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
-    }
+
+
+
+
+
+
+
+
+
+
+
+    client.write(buffer, len);
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+//    // Set the NeoPixel
+//    uint16_t pixel_num = 0;
+//    memcpy(&pixel_num, &buffer[0], 2);
+//    if (pixel_num == 0xFFFF)
+//    {
+//      //Serial.print("Setting all pixels");
+//      uint16_t i = 0;
+//      for (i = 0; i < NUMPIXELS; i++)
+//      {
+//        pixels.setPixelColor(i, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
+//      }
+//    }
+//    else if (pixel_num == 0xFFFE)
+//    {
+//      rainbowCycle(20);
+//    }
+//    else
+//    {
+//      //Serial.print("Setting pixel "); Serial.println(pixel_num);
+//      pixels.setPixelColor(pixel_num, pixels.Color(buffer[3], buffer[2], buffer[4], buffer[5]));
+//    }
     pixels.show();
 
     // call stop() to free memory by Client
