@@ -135,7 +135,9 @@ int taskNeoPixels() {
 Receive the HTTP request and set the global variables
  */
 int taskTCPServer() {
-    const char html_response[] = "<html><body><h1>OK</h1></body></html>";
+    const char httpOK[] =               "HTTP/1.1 200 OK\n\n<html><body><h1>OK</h1></body></html>";
+    const char httpNOT_FOUND[] =        "HTTP/1.1 404 Not Found\n\n<html><body><h1>NOT FOUND</h1></body></html>";
+    const char httpNOT_IMPLEMENTED[] =  "HTTP/1.1 501 Not Implemented\n\n<html><body><h1>NOT IMPLEMENTED</h1></body></html>";
     uint8_t buffer[256];
     uint16_t len;
 
@@ -166,12 +168,15 @@ int taskTCPServer() {
                 r = atoi((char*) &buffer[7]);
                 g = atoi((char*) &buffer[11]);
                 b = atoi((char*) &buffer[15]);
+
+                client.write(httpOK, strlen(httpOK));
+            } else {
+              client.write(httpNOT_FOUND, strlen(httpNOT_FOUND));
             }
 
+        } else {
+          client.write(httpNOT_IMPLEMENTED, strlen(httpNOT_IMPLEMENTED));
         }
-
-        client.write(html_response, sizeof(html_response));
-
 
         // call stop() to free memory by Client
         client.stop();
