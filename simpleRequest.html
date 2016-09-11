@@ -27,14 +27,38 @@
         get(WICED_URL + "c?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3));
     }
 
-    function setTransition(red, green, blue, time) {
-        get(WICED_URL + "t?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3), nDigits(time,5));
+    function setSmooth(red, green, blue, time) {
+        get(WICED_URL + "s?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3) + "-" + nDigits(time/10,5));
     }
 
 
     </script>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js">
+    </script>
+
+    <script>
+        var i = 0;
+
+        setInterval(function() {
+            switch (i) {
+                case 0:
+                    setSmooth(20,0,0,1000);
+                    i++;
+                    break;
+                case 1:
+                    setSmooth(0,20,0,1000);
+                    i++;
+                    break;
+                case 2:
+                    setSmooth(0,0,20,1000);
+                    i = 0;
+                    break;
+                default:
+                    i = 0;
+                    break;
+            }
+        }, 3000);
     </script>
 
     <form>
