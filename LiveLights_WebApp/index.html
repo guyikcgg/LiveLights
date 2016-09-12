@@ -1,0 +1,611 @@
+<html>
+<head>
+
+  <title>Live Lights</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="Shortcut Icon" href="http://demo.codesamplez.com/images/favicon.ico" type="image/x-icon"/>
+<meta name="keywords" content="Javscript Audio" />
+<meta name="description" content="Demo Application to demonstrate playing and controling HTML5 Audio media file with Javscript/jQuery script" />
+
+   <!-- Bootstrap starts -->
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+<!-- Bootstrap ends -->
+
+<!-- Jquery UI CSS Files Starts -->
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+<!-- Jquery UI CSS Files Ends -->
+
+<!-- Main site layout and styles Starts -->
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/styles/main/layout.css" />
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/styles/main/styles.css" />
+<!-- Main site layout and styles Ends -->
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/google-code-prettify/bin/prettify.min.css" />
+
+</head>
+<body style="background-image:url(live_lights.PNG)">
+  <audio class="audioDemo" preload="none">
+
+    <source src="finalMix.mp3" type="audio/mpeg">
+    </audio>
+
+    <p style="text-align:center">
+            <a class="start" style="font-size: 60px; text-decoration: none">Live Lights</a><br>
+    <img src="Microphone-icon.PNG" height="256" width="256">
+  </p>
+
+  <!--  <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>-->
+                        <!--<a class="btn btn-default load">Load Audio</a>-->
+
+<!--<a
+                        <a class="btn btn-default back">&lt;&lt;</a>
+                        <a class="btn btn-default forward"> &gt;&gt;</a>
+                    </p>
+                </div>
+                <div class="col-md-5 col-md-pull-1">
+                    <p>
+                        <a class="btn btn-info pause">Pause Audio</a>
+                        <a class="btn btn-danger stop">Stop Audio</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p>
+                        <a class="btn btn-default volume-up">Volume Up</a>
+                        <a class="btn btn-default volume-down">Volume down</a>
+                    </p>
+                </div>
+                <div class="col-md-7">
+                    <p>
+                        <a class="btn btn-default mute">Toggle Volume On/Off</a>
+                        -->
+            <!--        </p>
+                </div>
+
+            </div>
+        </div> -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="THXsignal.js"></script>
+        <script type="text/javascript">
+   var WICED_URL = "http://192.168.0.119/"
+   function get(url, callbackFunction) {
+       var xhr = new XMLHttpRequest();
+       xhr.open("GET", url, true);
+       xhr.onreadystatechange = function() {
+           if (xhr.readyState == 4) {
+               callbackFunction(xhr.responseText);
+           }
+       };
+       xhr.send();
+   }
+   function nDigits(value, n) {
+       var strValue = value.toString();
+       while(strValue.length < n) {
+           strValue = '0' + strValue;
+       }
+       return strValue;
+   }
+   function setColor(red, green, blue) {
+       get(WICED_URL + "c?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3));
+   }
+   function setBar(red, green, blue, time) {
+       get(WICED_URL + "b?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3) + "-" + nDigits(time/10,5));
+   }
+   function setSmooth(red, green, blue, time) {
+       get(WICED_URL + "s?" + nDigits(red,3) + "-" + nDigits(green,3) + "-" + nDigits(blue,3) + "-" + nDigits(time/10,5));
+   }
+   </script>
+
+   <script>
+   function coinOn(){
+    var json_data = {
+"on":true,"bri":255,"transitiontime":0};
+    $.ajax({
+     cache : false,
+     type: 'PUT',
+     url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+     data:JSON.stringify(json_data),
+     //dataType: "jsonp",
+     contentType:"application/json",
+     success: function(data){
+     },
+     error: function(data){
+     },
+     complete: function(data){
+     }
+   });
+}
+
+function coinOFF(){
+ var json_data = {
+"bri":0,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function init(){
+ var json_data = {
+"bri":0,"hue":20480,"sat":254,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function thx(bri){
+ var json_data = {
+"bri":bri};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function technoInit(bri){
+ var json_data = {
+"bri":255,"hue":65535,"sat":254,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function technoON(bri){
+ var json_data = {
+"bri":255,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function technoOFF(bri){
+ var json_data = {
+"bri":0,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+}
+
+function techno2ON(bri){
+ var json_data = {
+"bri":255,"hue":8192,"sat":254,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+
+  setBar(255,55,0,200);
+}
+
+function techno3ON(bri){
+ var json_data = {
+"bri":255,"hue":28672,"sat":254,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+
+  setBar(255,255,55,200);
+}
+
+function techno4ON(bri){
+ var json_data = {
+"bri":255,"hue":53257,"sat":254,"transitiontime":0};
+ $.ajax({
+  cache : false,
+  type: 'PUT',
+  url: 'http://192.168.1.13/api/30r54jwIbYeXdl6GaCNTweOBg8RN9veBy4wG7M4J/groups/0/action',
+  data:JSON.stringify(json_data),
+  //dataType: "jsonp",
+  contentType:"application/json",
+  success: function(data){
+  },
+  error: function(data){
+  },
+  complete: function(data){
+  }
+});
+
+  setBar(0,255,255,200);
+}
+
+
+
+   </script>
+
+   <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js">
+   </script>
+    <script>
+
+    var audio;
+    var data;
+    var state;
+    var intervalID;
+    //jInit is my own site standard which is triggered after aynschronous loading of javascript
+    //libraries. You can here use $(document).ready instead, in general case.
+    $( document ).ready(function() {
+      audio = $(".audioDemo");
+      addEventHandlers();
+    });
+
+    function addEventHandlers(){
+      $("a.load").click(loadAudio);
+      $("a.start").click(startAudio);
+      $("a.forward").click(forwardAudio);
+      $("a.back").click(backAudio);
+      $("a.pause").click(pauseAudio);
+      $("a.stop").click(stopAudio);
+      $("a.volume-up").click(volumeUp);
+      $("a.volume-down").click(volumeDown);
+      $("a.mute").click(toggleMuteAudio);
+    }
+
+    function loadAudio(){
+      audio.bind("load",function(){
+        $(".alert-success").html("Audio Loaded succesfully");
+      });
+      audio.trigger('load');
+    }
+
+    function loadAudio(){
+      audio.bind("load",function(){
+        $(".alert-success").html("Audio Loaded succesfully");
+      });
+      audio.trigger('load');
+    }
+
+    var i=0;
+    function test(){
+
+      if(i==0) {
+        init();
+        setSmooth(100,100,100,1000);
+      }
+
+      if(i==5) {
+          thx(20);
+      }
+
+      if(i==10) {
+          thx(50);
+      }
+
+      if(i==15) {
+          thx(100);
+      }
+
+      if(i==20) {
+          thx(150);
+      }
+
+      if(i==25) {
+          thx(200);
+      }
+
+      if(i==30) {
+          thx(255);
+      }
+
+      if(i==80) {
+          thx(150);
+          setSmooth(0,0,0,200);
+      }
+
+      if(i==85) {
+          thx(100);
+      }
+
+      if(i==90) {
+          thx(0);
+      }
+
+
+
+      if(i==99) {
+          technoInit();
+          setColor(255,255,255);
+      }
+
+      if(i==104) {
+          technoOFF(0);
+          setSmooth(255,0,0,200);
+      }
+
+      if(i==109) {
+          technoON();
+          setColor(255,255,255);
+      }
+
+      if(i==113) {
+          technoOFF(0);
+          setSmooth(255,0,0,200);
+      }
+
+      if(i==118) {
+          technoON();
+          setColor(255,255,255);
+      }
+
+      if(i==123) {
+          technoOFF(0);
+          setSmooth(255,0,0,200);
+      }
+
+      if(i==127) {
+          technoON();
+          setColor(255,255,255);
+      }
+
+      if(i==132) {
+          technoOFF(0);
+          setSmooth(255,0,0,200);
+      }
+
+      if(i==137) {
+          technoON();
+          setColor(255,255,255);
+      }
+
+      if(i==142) {
+          technoOFF(0);
+          setSmooth(255,0,0,300);
+      }
+
+      if(i==146) {
+          technoON();
+          setColor(255,255,255);
+      }
+
+      if(i==151) {
+          technoOFF(0);
+          setSmooth(255,0,0,300);
+      }
+
+      if(i==155) {
+          techno2ON();
+      }
+
+      if(i==161) {
+          techno3ON();
+      }
+
+      if(i==163) {
+          techno4ON();
+      }
+
+      if(i==194) {
+          techno2ON();
+      }
+
+      if(i==199) {
+          techno3ON();
+      }
+
+      if(i==203) {
+          techno4ON();
+      }
+
+      if(i==232) {
+          techno2ON();
+      }
+
+      if(i==236) {
+          techno3ON();
+      }
+
+      if(i==241) {
+          techno4ON();
+      }
+
+      if(i==269) {
+          techno2ON();
+      }
+
+      if(i==274) {
+          techno3ON();
+      }
+
+      if(i==279) {
+          techno4ON();
+      }
+
+      if(i==303) {
+          techno2ON();
+      }
+
+      if(i==311) {
+          techno3ON();
+      }
+
+      if(i==320) {
+          techno4ON();
+      }
+
+      if(i==327) {
+          techno2ON();
+      }
+
+      if(i==335) {
+          techno3ON();
+      }
+
+      if(i==340) {
+          technoInit();
+          setColor(255,0,0);
+      }
+
+      if(i==345) {
+          thx(200);
+          setSmooth(0,0,0,3500);
+      }
+
+      if(i==350) {
+          thx(180);
+      }
+
+      if(i==355) {
+          thx(140);
+      }
+
+      if(i==360) {
+          thx(100);
+      }
+
+      if(i==365) {
+          thx(50);
+      }
+
+      if(i==370) {
+          thx(0);
+      }
+
+
+
+
+      i++;
+      /*if(i==10) {
+        clearInterval(intervalID);
+      }*/
+    }
+
+
+    function startAudio(){
+      audio.trigger('play');
+      intervalID = setInterval(test, 100);
+    }
+
+    function pauseAudio(){
+      audio.trigger('pause');
+    }
+
+    function stopAudio(){
+      pauseAudio();
+      audio.prop("currentTime",0);
+    }
+
+    function forwardAudio(){
+      pauseAudio();
+      audio.prop("currentTime",audio.prop("currentTime")+5);
+      startAudio();
+    }
+
+    function backAudio(){
+      pauseAudio();
+      audio.prop("currentTime",audio.prop("currentTime")-5);
+      startAudio();
+    }
+
+    function volumeUp(){
+      var volume = audio.prop("volume")+0.2;
+      if(volume >1){
+        volume = 1;
+      }
+      audio.prop("volume",volume);
+    }
+
+    function volumeDown(){
+      var volume = audio.prop("volume")-0.2;
+      if(volume <0){
+        volume = 0;
+      }
+      audio.prop("volume",volume);
+    }
+
+    function toggleMuteAudio(){
+      audio.prop("muted",!audio.prop("muted"));
+    }
+
+    </script>
+  </body>
+  </html>
